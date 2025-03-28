@@ -1,11 +1,12 @@
 // webpack.config.js
-const Dotenv = require('dotenv-webpack');
 
 module.exports = {
-  plugins: [
-    new Dotenv({
-      path: '.env' // default is .env
-    })
-  ]
+  resolve: {
+    fallback: {
+      "path": false,
+      "os": false,
+      "crypto": false
+    },
+  },
 
 };

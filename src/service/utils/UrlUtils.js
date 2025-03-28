@@ -6,7 +6,8 @@ const auth = {
 const keys = {
   list: "/api/v1/keys",
   addCate: "api/sv2/private/category/add-cate",
-  listCate: "api/sv2/category/get-list"
+  listCate: "api/sv2/category/get-list",
+  discount: '/api/v1/discount'
 }
 
 const product = {
@@ -38,7 +39,7 @@ const proxy = {
 }
 const order = {
   create: "/api/v1/order",
-  recharge: "/api/v1/order/recharge"
-  
+  recharge: "/api/v1/order/recharge",
+  search: "/api/v1/order/_search",
 }
 export const URL = { auth, keys, product, proxy, order }

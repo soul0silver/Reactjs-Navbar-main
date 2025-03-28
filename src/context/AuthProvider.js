@@ -40,7 +40,7 @@ const AuthProvider = ({ children }) => {
     const updateUserInfo = () => {
         if (localStorage.getItem('token')) {
             getUser().then(res => {
-                if (res.status === 200){
+                if (res?.status === 200){
                     let data = res?.data
                     localStorage.setItem('user', JSON.stringify(data));
                     setWallet(data?.wallet)
@@ -57,11 +57,22 @@ const AuthProvider = ({ children }) => {
     
     };
 
+    const [seconds, setSeconds] = useState(0);
+ 
+  useEffect(() => {
+    if (seconds > 0) {
+      const timer = setTimeout(() => {
+        setSeconds(seconds - 1);
+      }, 1000);
+      return () => clearTimeout(timer); // Clean up the timer to avoid memory leaks
+    }
+  }, [seconds]); 
 
     return (
         <AuthContext.Provider
             value={{
                 checkLogin, getUserInfo, checkWallet, updateUserInfo, wallet, handleLogout
+                ,seconds, setSeconds
             }}
         >
             {children}

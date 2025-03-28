@@ -26,7 +26,11 @@ td {
     text-align: left;
     padding: 8px;
 }
-
+.help-page{
+    img {
+        cursor: pointer;
+    }
+}
 label {
     font-weight: 500;
     color: #758092;
@@ -87,4 +91,56 @@ label {
 
 .dropdown:hover .dropdown-content {
     display: block;
+}
+
+.my-auto{
+    a {
+        display: flex;
+        align-items: center;
+    }
+}
+
+.navbar {
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    z-index: 10;
+}
+
+.navbar.scrolled {
+    background-color: rgba(215, 222, 238, 1); 
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); 
+}
+
+.footer-content-area {
+    padding: 100px 0 100px;
+    background: linear-gradient(182deg, #2685ed 0%, #2f69ff 100%);
+}
+.sub-header{
+    background-size: cover !important;
+}
+.policy p{
+    line-height: 1.9;
+    font-size: 15px;
+    margin-bottom: 1rem;
+}
+
+.special-head {
+    padding-left: 40px;
+    font-size: 18px;
+    position: relative;
+    display: inline-block;
+}
+
+.g-text {
+    color: #d4d7e1 !important;
+}
+
+.special-head:before {
+    content: '';
+    background: #39f9f9;
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 30px;
+    height: 2px;
+    box-sizing: border-box;
 }

@@ -1,7 +1,11 @@
-import { useEffect, useState } from "react"
-import { searchKey } from "../service/keys/KeyService";
+import { useContext, useEffect, useState } from "react"
+import { deleteKeys, searchKey, updateKeys } from "../service/keys/KeyService";
 import Pagination from "../components/Paging";
 import GetProxy from "../components/GetProxy";
+import { AuthContext } from "../context/AuthProvider";
+import ExtendKey from "../components/ExtendKey";
+import BuyKey from "../components/BuyKey";
+import Subheader from "../components/Subheader";
 
 export default function KeyManage() {
   const [keys, setKeys] = useState([]);
@@ -12,13 +16,15 @@ export default function KeyManage() {
   const [paging, setPage] = useState({ page: 1, totalPages: 1, size: criteria?.size })
   const [chosenKey, setChosen] = useState();
   const [selected, setSelected] = useState([]);
-
+  const [extend, setExtend] = useState(false);
+  const [buy, setBuy] = useState(false);
+  const { seconds, setSeconds } = useContext(AuthContext)
   const onSelect = (e, key) => {
     if (e.target.checked) {
-      setSelected([...selected, key?.keyProxy])
+      setSelected([...selected, key])
     }
     else {
-      setSelected(selected.filter(k => k !== key?.keyProxy))
+      setSelected(selected.filter(k => k?.id !== key?.id))
     }
   }
 
@@ -29,19 +35,20 @@ export default function KeyManage() {
 
   const incrementPage = () => {
     if (paging?.page < paging?.totalPages) {
-      let next = paging?.page+1;
-      search({...criteria, page: next})
+      let next = paging?.page + 1;
+      search({ ...criteria, page: next })
     }
   }
 
   const decrementPage = () => {
     if (paging?.page > 1) {
-      let prev = paging?.page-1;
-      search({...criteria, page: prev})
+      let prev = paging?.page - 1;
+      search({ ...criteria, page: prev })
     }
   }
 
   const search = (body) => {
+    setSelected([])
     searchKey(body).then(res => {
       let data = res?.data;
       if (data) {
@@ -52,29 +59,29 @@ export default function KeyManage() {
   }
   useEffect(() => {
     search(criteria)
-  }, [])
-
-  const [seconds, setSeconds] = useState(0);
-  const countDown = () => {
-    if (seconds > 0) {
-      setTimeout(() => setSeconds(seconds - 1), 1000);
-    } else {
-      setSeconds(0);
-    }
-  };
-
+  }, []);
+  function deleteSelected() {
+    deleteKeys(selected.map(v => v.keyProxy)).then(res => {
+      if (res?.status === 200) {
+        alert("Xoá thành công!")
+      }
+    })
+  }
   return <>
+    <Subheader page={"Quản lý key"}/>
     <div className="w-full flex flex-col justify-center items-center py-8">
+      {buy && <BuyKey setBuy={setBuy} creteria={criteria} searchKey={search} />}
+      {extend && <ExtendKey keys={extend} setExtend={setExtend} search={search} criteria={criteria} />}
       {chosenKey && <GetProxy keys={chosenKey} setShow={setChosen} />}
-      <div className="border border-gray-200rounded-md">
-        <div className=" w-full flex flex-col ">
-          <div className=" w- full flex flex-row space-x-6 p-[20px] bg-[#f7f7f7]">
-            <div className="flex flex-col ">
+      <div className="border border-gray-200 rounded-md">
+        <div className="flex flex-col ">
+          <div className="flex md:flex-row flex-col lg:space-x-6 p-[20px] bg-[#f7f7f7]">
+            <div className="flex flex-col w-full md:w-auto">
               <label htmlFor="">Tìm kiếm</label>
-              <div className="flex flex-row space-x-2">
+              <div className="flex flex-row space-x-2 md:w-full">
                 <select name="" id="" value={criteria?.field}
                   onChange={(e) => setCriteria({ ...criteria, keyProxy: '', alias: '', field: e.target.value })}
-                  class="w-full border h-[38px] border-gray-300 pl-3  outline-none
+                  class="border h-[38px] border-gray-300 pl-3  outline-none w-full md:w-auto
                  focus:border-indigo-600 :ring-indigo-600"
                 >
                   <option value="key">Key</option>
@@ -89,12 +96,12 @@ export default function KeyManage() {
                     else
                       setCriteria({ ...criteria, alias: e.target.value })
                   }}
-                  class="w-full border h-[38px] border-gray-300 pl-3  outline-none
+                  class="border h-[38px] border-gray-300 pl-3  outline-none w-full md:w-auto
                  focus:border-indigo-600 :ring-indigo-600"
                 />
               </div>
             </div>
-            <div className="flex flex-col ">
+            <div className="flex flex-col">
               <label htmlFor="">Loại key</label>
               <select name="" id="" value={criteria?.type}
                 onChange={(e) => setCriteria({ ...criteria, type: e.target.value })}
@@ -144,39 +151,47 @@ export default function KeyManage() {
             </div>
           </div>
 
-          <div className="flex flex-warp items-center action-btn-group  p-[20px] ">
-            <button className="bg-[#25a945]" onClick={() => search()}>Tìm kiếm</button>
-            <button className="bg-[#25a945]">Mua mới</button>
-            <button className="bg-[#017aff]">Gia các hạn key đã chọn</button>
-            <button className="bg-[#d93646]">Xoá các key đã chọn</button>
-            <button className="bg-[#017aff]" onClick={() => setChosen(selected)}>Lấy proxy các key đã chọn</button>
+          <div className="w-full flex flex-wrap items-center action-btn-group  p-[20px] ">
+            <button className="bg-[#25a945] hover:bg-[#68dd85] text-nowrap" onClick={() => search(criteria)}>Tìm kiếm</button>
+            <button className="bg-[#25a945] hover:bg-[#68dd85] text-nowrap"
+              onClick={() => setBuy(true)}
+            >Mua mới</button>
+            <button className="bg-[#017aff] hover:bg-[#65a1e0] text-nowrap" onClick={(e) => { e.preventDefault(); setExtend(selected) }} >Gia các hạn key đã chọn</button>
+            <button className="bg-[#d93646] hover:bg-[#ed7682] text-nowrap"
+              onClick={() => {
+                if (selected.length !== 0) {
+                  deleteSelected();
+                }
+              }}
+            >Xoá các key đã chọn</button>
+            <button className="bg-[#017aff] hover:bg-[#65a1e0] text-nowrap" onClick={() => setChosen(selected)}>Lấy proxy các key đã chọn</button>
           </div>
           <hr />
-          <div className="p-[20px]">
-            <div className="">
-              <table className="border-collapse">
+          <div className="p-[20px] max-w-[412px] md:max-w-full overflow-scroll md:overflow-hidden">
+            <div className="w-full">
+              <table className="w-full border-collapse">
                 <thead>
                   <tr className="font-bold">
                     {keys?.length > 0 && <th><input type="checkbox"
                       checked={selected.length === keys.length && keys.length > 0}
                       onChange={(e) => {
-                        setSelected(e.target.checked ? keys?.map((k, i) => k?.keyProxy) : [])
+                        setSelected(e.target.checked ? keys?.map((k, i) => k) : [])
                       }}
                     /></th>}
                     <th className="w-[30px]">#</th>
-                    <th className="w-[400px]">Key</th>
-                    <th className="w-[100px]">Alias</th>
-                    <th className="w-[100px]">Loại key</th>
-                    <th className="w-[100px]">Thời gian mua</th>
-                    <th className="w-[100px]">Hạn dùng</th>
-                    <th className="w-[100px]">Trạng thái</th>
-                    <th className="w-[100px]">Thao tác</th>
+                    <th className="lg:w-[400px] w-[100px]">Key</th>
+                    <th className="lg:w-[100px]">Alias</th>
+                    <th className="lg:w-[100px]">Loại key</th>
+                    <th className="lg:w-[100px]">Thời gian mua</th>
+                    <th className="lg:w-[100px]">Hạn dùng</th>
+                    <th className="lg:w-[100px]">Trạng thái</th>
+                    <th className="lg:w-[100px]">Thao tác</th>
                   </tr>
                 </thead>
                 <tbody>
                   {
                     keys?.map((k, i) => <tr key={i}>
-                      <td><input type="checkbox" checked={selected.includes(k?.keyProxy)}
+                      <td><input type="checkbox" checked={selected.includes(k)}
                         onChange={(e) => onSelect(e, k)}
                       /></td>
                       <td>{i + 1}</td>
@@ -189,10 +204,16 @@ export default function KeyManage() {
                         'Còn hiệu lực' : 'Hết hiệu lực'
                       }</td>
                       <td>
-                        {new Date(k?.outdated).getTime() > new Date() &&
-                          <button onClick={() => setChosen([k?.keyProxy])} className="text-[#71a2cf] hover:text-[#3f45e8]">Lấy proxy</button>}
-                        <button className="text-[#71a2cf] hover:text-[#3f45e8]">Đổi alias</button>
-                        <button className="text-[#71a2cf] hover:text-[#3f45e8]">Gia hạn</button>
+                        <div className="flex flex-col text-nowrap">
+                          {new Date(k?.outdated).getTime() > new Date() &&
+                            <button onClick={() => setChosen([k])}
+                              disabled={seconds > 0}
+                              className="text-[#71a2cf] hover:text-[#3f45e8]">{seconds > 0 ? seconds : 'Lấy proxy'}</button>}
+                          <button className="text-[#71a2cf] hover:text-[#3f45e8]">Đổi alias</button>
+                          <button className="text-[#71a2cf] hover:text-[#3f45e8]"
+                            onClick={() => setExtend([k])}
+                          >Gia hạn</button>
+                        </div>
                       </td>
                     </tr>)
                   }

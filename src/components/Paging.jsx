@@ -42,16 +42,16 @@ export default function Pagination({
       <button
         style={{ display: page === 1 && "none" }}
         disabled={page === 1}
-        onClick={decrementPage}
+        onClick={() => { decrementPage(); setCurrent(current - 1) }}
         className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
       >
-        {'<'} <span>Previous</span>
+        {'<'} <span>Trang trước</span>
       </button>
       <div className="sm:flex-1 flex justify-center w-full">
 
         <div>
           <pre className="text-sm text-gray-700">
-            Showing page <input type="number" min={1} value={current} max={totalPages} defaultValue={page}
+            Hiển thị <input type="number" min={1} value={current} max={totalPages} defaultValue={page}
               onKeyDown={(evt) => ["e", "E", "+", "-"].includes(evt.key) && evt.preventDefault()}
               onChange={(e) => {
                 setCurrent(e.target.value)
@@ -63,17 +63,17 @@ export default function Pagination({
                   changePage(current)
               }}
               className="w-[50px] text-center border h-[38px] border-gray-300 outline-none
-                 focus:border-indigo-600 :ring-indigo-600" /> of {totalPages} pages
+                 focus:border-indigo-600 :ring-indigo-600" /> / {totalPages} trang
           </pre>
         </div>
 
       </div>
       <button style={{ display: page === totalPages && "none" }}
         disabled={page === totalPages}
-        onClick={incrementPage}
+        onClick={() => { incrementPage(); setCurrent(current + 1) }}
         className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
       >
-        <span>Next</span> {'>'}
+        <span>Trang tiếp</span> {'>'}
       </button>
     </div>
   );

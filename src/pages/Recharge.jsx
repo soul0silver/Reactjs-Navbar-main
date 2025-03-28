@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { recharge } from "../service/orders/OrderService";
+import Subheader from "../components/Subheader";
 
 export default function Recharge() {
-  const [amount, setAmount] = useState(1000);
+  const [amount, setAmount] = useState(2000);
   const [check, setCheck] = useState(false)
   const [checkoutInfo, setInfo] = useState('');
   const checkMoney = () => {
@@ -22,13 +23,16 @@ export default function Recharge() {
   }
   return (
     <>
+      <Subheader page={'Nạp tiền'}/>
+      
+  
       {check && <div className="absolute top-0 left-0 z-13 w-full 
       h-full flex flex-col items-center justify-center popup-backgorund">
         <div onClick={() => setCheck()}
           className="absolute top-0 left-0 w-full h-full popup-backgorund z-[14]"></div>
         <div className="absolute z-[40]"><iframe src={checkoutInfo} width={900} height={900} /></div>
       </div>}
-      <div className="w-full h-full flex flex-col items-center justify-center">
+      <div className="w-full min-h-[500px] flex flex-col items-center justify-center">
         <div className="w-fit">
           <label htmlFor="">Số tiền nạp</label>
           <div className="flex space-x-3">

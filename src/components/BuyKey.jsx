@@ -2,15 +2,17 @@ import { useContext, useEffect, useState } from "react"
 import { createOrder } from "../service/orders/OrderService";
 import { searchProduct } from "../service/products/ProductService";
 import { AuthContext } from "../context/AuthProvider";
+import { getDiscount } from "../service/keys/KeyService";
 
-export default function BuyKey({ product, setBuy }) {
+export default function BuyKey({ product, setBuy, searchKey, creteria }) {
   const [order, setOrder] = useState({
-    type: product?.type, quantity: 1, times: 1,
-    name: product?.name
+    type: product?.type ? product?.type : 'ONE_HOUR', quantity: 1, times: 1,
+    name: product?.name ? product?.name : 'key 1 giờ'
   });
   const [products, setProducts] = useState([{ id: 1, price: 15000, type: 'KEY THƯỜNG' }]);
   const [spamPrevent, setSpam] = useState(false);
   const [confirm, setConfirm] = useState(false);
+  const [discount, setDiscount] = useState([])
   const { checkWallet, updateUserInfo } = useContext(AuthContext)
 
   useEffect(() => {
@@ -19,7 +21,23 @@ export default function BuyKey({ product, setBuy }) {
         setProducts(res.data.pageData)
       setSpam(false)
     })
+
+    getDiscount().then(res => {
+      if (res?.status === 200) 
+        setDiscount(res.data)    
+    })
   }, [])
+
+  const calcDiscount = () => {
+    let d = discount?.filter(v=>v.type === order.type)[0]
+    let p = products.filter(v => v.type === order.type)[0]?.price
+    
+    if (d) {
+      if (order.quantity * order.times >= d.quantity && order.quantity * order.times * p >= d.total)
+        return d.percent
+    }
+    return 0
+  }
 
   const create = () => {
     setSpam(true)
@@ -27,6 +45,8 @@ export default function BuyKey({ product, setBuy }) {
       if (res.status === 200) {
         alert("Mua thành công!");
         updateUserInfo();
+        searchKey(creteria)
+        setConfirm(false);
       }
       else alert("Mua thất bại!")
       setSpam(false);
@@ -35,7 +55,7 @@ export default function BuyKey({ product, setBuy }) {
   }
   return (
     <>
-      <div className="absolute top-0 left-0 z-10 w-full 
+      <div className="fixed top-0 left-0 z-10 w-full 
       h-full flex flex-col items-center justify-center popup-backgorund"
 
       >
@@ -54,13 +74,15 @@ export default function BuyKey({ product, setBuy }) {
               <label htmlFor="">Loại key</label>
               <select value={order?.type}
                 onChange={(e) => {
-                  setOrder({ ...order, type: e.target.value });
+                  setOrder({ ...order, type: e.target.value, 
+                    name: products.filter(v => v?.type === e.target.value)[0]?.name });
                 }}
                 class="w-full border h-[38px] border-gray-300 pl-3  outline-none
                  focus:border-indigo-600 :ring-indigo-600"
               >
-                <option value="ONE_HOUR">1 GIỜ</option>
-                <option value="ONE_DAY">1 NGÀY</option>
+                {
+                  products?.map(p => <option value={p.type}>{p.name}</option>)
+                }
               </select>
             </div>
 
@@ -118,7 +140,7 @@ export default function BuyKey({ product, setBuy }) {
                 {order?.type === 'ONE_DAY' ? '1 Tháng' : '30 giờ'}
               </label>
             </div>
-            <div><pre>{`Tổng tiền    `} {products.filter(p => p?.type === order?.type)[0]?.price * order?.quantity * order?.times} VND</pre></div>
+            <div><pre>{`Tổng tiền    `} {products.filter(p => p?.type === order?.type)[0]?.price * order?.quantity * order?.times} VND {calcDiscount() !== 0 &&`(giảm ${calcDiscount()}%) = ${products.filter(p => p?.type === order?.type)[0]?.price * order?.quantity * order?.times * (100 - calcDiscount())/100} VND`}</pre></div>
             {!checkWallet(products.filter(p => p?.type === order?.type)[0]?.price * order?.quantity * order?.times) && <div className="text-red-600">
               {'Tiền trong tài khoản không đủ!'} <a className="text-red-500 hover:text-red-800" href="/recharge">Nạp thêm!</a></div>}
           </div>
@@ -131,7 +153,7 @@ export default function BuyKey({ product, setBuy }) {
         </div>
       </div>
 
-      {confirm && <div className="absolute top-0 left-0 z-10 w-full 
+      {confirm && <div className="fixed top-0 left-0 z-10 w-full 
       h-full flex flex-col items-center justify-center popup-backgorund"
       >
         <div onClick={() => setConfirm(false)}
@@ -148,7 +170,7 @@ export default function BuyKey({ product, setBuy }) {
             <p>Số ngày(giờ) mua: <span className="font-bold">{order?.times}</span></p>
             <p>Loại key: <span className="font-bold">{order?.type.replace('_', ' ')}</span></p>
             <p className="text-red-500 font-bold">Thành tiền: <span className="font-bold">
-              {products.filter(p => p?.type === order?.type)[0]?.price}</span> VND</p>
+              {products.filter(p => p?.type === order?.type)[0]?.price * order?.quantity * order?.times}</span> VND</p>
             <p className="font-bold">Bạn có chắc chắn muốn mua không?</p>
             <p className="text-red-500 font-bold">VUI LÒNG CHECK KỸ SỐ LƯỢNG VÀ LOẠI KEY!</p>
             <p className="text-red-500 font-bold">Key đã mua sẽ không được đổi/trả!</p>

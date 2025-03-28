@@ -1,0 +1,7 @@
+Chào bạn, buổi tối vui vẻ! Bạn có kế hoạch gì cho tối nay không?
+It seems like you're asking how to copy text to the clipboard programmatically. Here’s a simple JavaScript code snippet you can use to copy text to the clipboard on a website:
+When you run this function, it will copy the provided text to the clipboard and alert the user. Let me know if you need a more specific use case or a different programming language!
+Để tạo một file .txt và tải về nó bằng JavaScript, bạn có thể sử dụng phương thức Blob để tạo file và URL.createObjectURL để tạo liên kết tải về. Dưới đây là một ví dụ đơn giản:
+Khi chạy đoạn mã này trên một trang web, một file .txt sẽ được tạo ra và tự động tải về với tên là example.txt và nội dung là "Đây là nội dung của file văn bản."
+Bạn có thể tùy chỉnh nội dung và tên file theo nhu cầu của mình.
+

@@ -22,3 +22,14 @@ export const recharge = async (body) => {
     return err.response;
   }
 }
+
+export const searchOrder = async (body) => {
+  let res;
+  try {
+    res = await axiosInstance.post(URL.order.search, body);
+    return res
+  } catch (err) {
+
+    return err.response;
+  }
+}

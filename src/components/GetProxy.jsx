@@ -1,26 +1,35 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { randProxy } from "../service/proxies/ProxiesService";
+import { AuthContext } from "../context/AuthProvider";
 
 export default function GetProxy({ keys, setShow }) {
   const [location, setLocation] = useState([]);
   const [selectedLoc, setSelected] = useState('');
   const [result, setResult] = useState([]);
+  const {seconds, setSeconds} = useContext(AuthContext)
   const copyToClip = () => {
-    window.navigator.clipboard.writeText(result.join('\n'))
+    // navigator.clipboard.writeText(result.join('\n'))
+    var a = document.createElement("a");
+    var json = result.join('\n'),
+        blob = new Blob([json], {type: "octet/stream"}),
+        url = window.URL.createObjectURL(blob);
+    a.href = url;
+    a.download = 'proxy.txt';
+    a.click();
+    window.URL.revokeObjectURL(url);
   }
-  useEffect(() => {
-
-  }, [])
 
   const getProxies = () => {
-    randProxy({ keys: keys, location: selectedLoc }).then(res => {
-      console.log(res);
-
-      if (res?.status === 200)
-        setResult(res?.data?.map(v => v?.ip + ':' + v?.port))
-
+    setSeconds(180)
+    randProxy({ keys: keys?.map(k=>k?.keyProxy), location: selectedLoc }).then(res => {
+      if (res?.status === 200){
+        setResult(res?.data)
+      }
     })
   }
+
+  
+  
   return (
     <>
       <div className="fixed top-0 left-0 z-10 w-full 
@@ -52,14 +61,15 @@ export default function GetProxy({ keys, setShow }) {
             </div>
             <div className=" flex justify-between">
               <button
-                onClick={() => { getProxies() }}
-                className="bg-[#25a945] w-[160px] h-[38px] text-white rounded-sm px-2">Lấy proxy</button>
+                onClick={(e) => { e.preventDefault() ;getProxies() }}
+                disabled={seconds>0}
+                className="bg-[#25a945] w-[160px] h-[38px] text-white rounded-sm px-2">{seconds > 0 ? seconds : "Lấy proxy"}</button>
               {result?.length > 0 && <button
                 onClick={() => { copyToClip() }}
                 className="bg-[#25a945] w-[160px] h-[38px] text-white rounded-sm px-2">Copy all</button>}
             </div>
-            <div className="max-h-[200px] overflow-auto">
-              {result?.map((v, i) => <p key={i}>{v}</p>)}
+            <div className="max-h-[200px] overflow-auto w-full flex flex-wrap justify-between">
+              {result?.map((v, i) => <div key={i}>{v}</div>)}
             </div>
           </div>
         </div>
