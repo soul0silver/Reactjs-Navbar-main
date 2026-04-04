@@ -78,6 +78,7 @@ export default function AuthPage() {
               }}
               class="cursor-pointer py-2 px-4 block mt-6 bg-indigo-500 text-white font-bold w-full text-center rounded">Đăng nhập</button>
           </form>
+          <a href={'/'}></a>
         </div>
       </div>
     </div>

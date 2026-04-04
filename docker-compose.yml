@@ -6,6 +6,6 @@ services:
     container_name: my-app
     build: .
     ports:
-      - 3001:80
+      - 3000:80
     volumes:
-      - ./env.js:/usr/share/nginx/html/public/env.js:ro
+      - ./public/env.js:/usr/share/nginx/html/public/env.js:ro
