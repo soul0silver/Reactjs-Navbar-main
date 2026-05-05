@@ -19,6 +19,11 @@ import ServicePolicy from "./pages/ServicePolicy";
 import Help from "./pages/Help";
 import GPMHelp from "./pages/GpmHelp";
 import Tutorial from "./pages/Tutorial";
+import BookPage from "./pages/BookPage";
+import BookForm from "./pages/BookForm";
+import AuthorPage from "./pages/AuthorPage";
+import CategoryPage from "./pages/CategoryPage";
+import PublisherPage from "./pages/PublisherPage";
 
 function App() {
   const { getUserInfo } = useContext(AuthContext)
@@ -44,8 +49,14 @@ function App() {
           <Route path="/service_policy" element={<ServicePolicy />}/>
           <Route path="/help/dolphin-anty" element={<Help />}/>
           <Route path="/help/gpm-login" element={<GPMHelp />}/>
-          <Route  path="/help" element={<Tutorial />}>
+          <Route path="/help" element={<Tutorial />}>
           </Route>
+          <Route path="/books" element={<BookPage />} />
+          <Route path="/books/new" element={<BookForm />} />
+          <Route path="/books/:id/edit" element={<BookForm />} />
+          <Route path="/authors" element={<AuthorPage />} />
+          <Route path="/categories" element={<CategoryPage />} />
+          <Route path="/publishers" element={<PublisherPage />} />
           <Route path="*" element={<NoPage />} />
         </Routes>
         <Footer />

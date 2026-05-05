@@ -104,6 +104,17 @@ function Navbar() {
                   Quản lý key
                 </li>
               </NavLink>}
+              {checkLogin() && <NavLink
+                to="/books"
+                style={({ isActive }) => ({
+                  color: isActive ? "rgb(107, 33, 168)" : scrolled ? "#000" : '#fff',
+                  textDecoration: "none",
+                })}
+              >
+                <li className="mr-10 p-1 border-2 border-transparent hover:text-black  hover:bg-white rounded">
+                  Cửa hàng sách
+                </li>
+              </NavLink>}
               {!checkLogin() ? <><NavLink
                 to="/login"
                 style={({ isActive }) => ({
@@ -196,6 +207,17 @@ function Navbar() {
               >
                 <li className="mr-10 p-1 border-2 border-transparent hover:text-black  hover:bg-white rounded">
                   Quản lý key
+                </li>
+              </NavLink>}
+              {checkLogin() && <NavLink
+                to="/books"
+                style={({ isActive }) => ({
+                  color: isActive ? "rgb(107, 33, 168)" : "#000",
+                  textDecoration: "none",
+                })}
+              >
+                <li className="mr-10 p-1 border-2 border-transparent hover:text-black  hover:bg-white rounded">
+                  Cửa hàng sách
                 </li>
               </NavLink>}
 
