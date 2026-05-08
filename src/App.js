@@ -10,7 +10,7 @@ import { useEffect } from "react";
 import Recharge from "./pages/Recharge";
 import { AuthContext } from "./context/AuthProvider";
 import Resgister from "./pages/Register";
-import OrderPage from "./pages/CategoryPage";
+import OrderPage from "./pages/OrderPage";
 import Footer from "./components/Footer";
 import Policy1 from "./pages/Policy1";
 import SecuPolicy from "./pages/SecuPolicy";
@@ -19,7 +19,11 @@ import ServicePolicy from "./pages/ServicePolicy";
 import Help from "./pages/Help";
 import GPMHelp from "./pages/GpmHelp";
 import Tutorial from "./pages/Tutorial";
+import BookPage from "./pages/BookPage";
+import BookForm from "./pages/BookForm";
+import AuthorPage from "./pages/AuthorPage";
 import CategoryPage from "./pages/CategoryPage";
+import PublisherPage from "./pages/PublisherPage";
 
 function App() {
   const { getUserInfo } = useContext(AuthContext)
@@ -35,8 +39,24 @@ function App() {
         <Routes>
           <Route index element={<Homepage />} />
           <Route path="/register" element={<Resgister />} />
+          <Route path="/keys" element={<KeyManage />} />
+          <Route path="/recharge" element={<Recharge />} />
           <Route path="/login" element={<AuthPage />} />
-          <Route path="/category" element={<CategoryPage />} />
+          <Route path="/transaction" element={<OrderPage />}/>
+          <Route path="/feedback_policy" element={<Policy1 />}/>
+          <Route path="/secured_policy" element={<SecuPolicy />}/>
+          <Route path="/pay_policy" element={<PayPolicy />}/>
+          <Route path="/service_policy" element={<ServicePolicy />}/>
+          <Route path="/help/dolphin-anty" element={<Help />}/>
+          <Route path="/help/gpm-login" element={<GPMHelp />}/>
+          <Route path="/help" element={<Tutorial />}>
+          </Route>
+          <Route path="/books" element={<BookPage />} />
+          <Route path="/books/new" element={<BookForm />} />
+          <Route path="/books/:id/edit" element={<BookForm />} />
+          <Route path="/authors" element={<AuthorPage />} />
+          <Route path="/categories" element={<CategoryPage />} />
+          <Route path="/publishers" element={<PublisherPage />} />
           <Route path="*" element={<NoPage />} />
         </Routes>
         <Footer />

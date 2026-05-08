@@ -1,20 +1,20 @@
 import { useEffect, useState } from "react";
-import { listCategories, createCategory, updateCategory, deleteCategory } from "../service/categories/CategoryService";
+import { listAuthors, createAuthor, updateAuthor, deleteAuthor } from "../service/authors/AuthorService";
 import Pagination from "../components/Paging";
 import Subheader from "../components/Subheader";
 
-export default function CategoryPage() {
-  const [items, setItems] = useState([]);
+export default function AuthorPage() {
+  const [authors, setAuthors] = useState([]);
   const [paging, setPaging] = useState({ page: 1, totalPages: 1, size: 10 });
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState(null);
-  const [form, setForm] = useState({ name: "", description: "" });
+  const [form, setForm] = useState({ name: "", biography: "", birthDate: "" });
 
   const search = (page = 1, size = 10) => {
-    listCategories(page - 1, size).then((res) => {
+    listAuthors(page - 1, size).then((res) => {
       const data = res?.data;
       if (data) {
-        setItems(data?.pageData || []);
+        setAuthors(data?.pageData || []);
         setPaging({ page: data?.pageNumber, totalPages: data?.totalPages, size: data?.pageSize });
       }
     });
@@ -24,37 +24,53 @@ export default function CategoryPage() {
 
   const openCreate = () => {
     setEditing(null);
-    setForm({ name: "", description: "" });
+    setForm({ name: "", biography: "", birthDate: "" });
     setShowForm(true);
   };
 
-  const openEdit = (item) => {
-    setEditing(item);
-    setForm({ name: item.name || "", description: item.description || "" });
+  const openEdit = (author) => {
+    setEditing(author);
+    setForm({
+      name: author.name || "",
+      biography: author.biography || "",
+      birthDate: author.birthDate || "",
+    });
     setShowForm(true);
   };
 
   const handleSave = () => {
     if (!form.name.trim()) {
-      alert("Vui lòng nhập tên danh mục");
+      alert("Vui lòng nhập tên tác giả");
       return;
     }
-    const payload = { name: form.name, description: form.description || null };
+    const payload = {
+      name: form.name,
+      biography: form.biography || null,
+      birthDate: form.birthDate || null,
+    };
     if (editing) {
-      updateCategory(editing.id, payload).then((res) => {
-        if (res?.status === 200) { setShowForm(false); search(paging.page, paging.size); }
+      updateAuthor(editing.id, payload).then((res) => {
+        if (res?.status === 200) {
+          setShowForm(false);
+          search(paging.page, paging.size);
+        }
       });
     } else {
-      createCategory(payload).then((res) => {
-        if (res?.status === 200) { setShowForm(false); search(paging.page, paging.size); }
+      createAuthor(payload).then((res) => {
+        if (res?.status === 200) {
+          setShowForm(false);
+          search(paging.page, paging.size);
+        }
       });
     }
   };
 
   const handleDelete = (id) => {
-    if (window.confirm("Bạn có chắc muốn xoá danh mục này?")) {
-      deleteCategory(id).then((res) => {
-        if (res?.status === 200) search(paging.page, paging.size);
+    if (window.confirm("Bạn có chắc muốn xoá tác giả này?")) {
+      deleteAuthor(id).then((res) => {
+        if (res?.status === 200) {
+          search(paging.page, paging.size);
+        }
       });
     }
   };
@@ -65,13 +81,13 @@ export default function CategoryPage() {
 
   return (
     <>
-      <Subheader page="Quản lý danh mục" />
+      <Subheader page="Quản lý tác giả" />
       <div className="w-full flex flex-col justify-center items-center py-8">
         <div className="border border-gray-200 rounded-md w-full max-w-5xl">
           <div className="p-5 bg-[#f7f7f7] flex justify-between items-center">
-            <span className="font-bold text-lg">Danh sách danh mục</span>
+            <span className="font-bold text-lg">Danh sách tác giả</span>
             <button className="bg-[#25a945] hover:bg-[#68dd85] text-white px-4 py-2 rounded" onClick={openCreate}>
-              Thêm danh mục
+              Thêm tác giả
             </button>
           </div>
           <div className="p-5 overflow-x-auto">
@@ -80,29 +96,31 @@ export default function CategoryPage() {
                 <tr className="font-bold bg-gray-50">
                   <th className="p-2 text-left">#</th>
                   <th className="p-2 text-left">Tên</th>
-                  <th className="p-2 text-left">Mô tả</th>
+                  <th className="p-2 text-left">Tiểu sử</th>
+                  <th className="p-2 text-left">Ngày sinh</th>
                   <th className="p-2 text-center">Thao tác</th>
                 </tr>
               </thead>
               <tbody>
-                {items?.map((c, i) => (
-                  <tr key={c.id} className="border-t hover:bg-gray-50">
+                {authors?.map((a, i) => (
+                  <tr key={a.id} className="border-t hover:bg-gray-50">
                     <td className="p-2">{i + 1}</td>
-                    <td className="p-2">{c.name}</td>
-                    <td className="p-2 max-w-xs truncate">{c.description}</td>
+                    <td className="p-2">{a.name}</td>
+                    <td className="p-2 max-w-xs truncate">{a.biography}</td>
+                    <td className="p-2">{a.birthDate}</td>
                     <td className="p-2 text-center">
-                      <button className="text-[#017aff] hover:text-[#3f45e8] mr-3" onClick={() => openEdit(c)}>Sửa</button>
-                      <button className="text-[#d93646] hover:text-[#ed7682]" onClick={() => handleDelete(c.id)}>Xoá</button>
+                      <button className="text-[#017aff] hover:text-[#3f45e8] mr-3" onClick={() => openEdit(a)}>Sửa</button>
+                      <button className="text-[#d93646] hover:text-[#ed7682]" onClick={() => handleDelete(a.id)}>Xoá</button>
                     </td>
                   </tr>
                 ))}
-                {items?.length === 0 && (
-                  <tr><td colSpan={4} className="text-center p-4 bg-[#eff6ff]">Không có dữ liệu</td></tr>
+                {authors?.length === 0 && (
+                  <tr><td colSpan={5} className="text-center p-4 bg-[#eff6ff]">Không có dữ liệu</td></tr>
                 )}
               </tbody>
               {paging?.totalPages > 1 && (
                 <tfoot>
-                  <tr><td colSpan={4}>
+                  <tr><td colSpan={5}>
                     <Pagination page={paging.page} totalPages={paging.totalPages} changePage={changePage} incrementPage={incrementPage} decrementPage={decrementPage} />
                   </td></tr>
                 </tfoot>
@@ -115,7 +133,7 @@ export default function CategoryPage() {
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h3 className="text-lg font-bold mb-4">{editing ? "Sửa danh mục" : "Thêm danh mục"}</h3>
+            <h3 className="text-lg font-bold mb-4">{editing ? "Sửa tác giả" : "Thêm tác giả"}</h3>
             <div className="space-y-3">
               <div>
                 <label className="block text-sm font-medium mb-1">Tên <span className="text-red-500">*</span></label>
@@ -125,10 +143,17 @@ export default function CategoryPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Mô tả</label>
-                <textarea value={form.description}
-                  onChange={(e) => setForm({ ...form, description: e.target.value })}
+                <label className="block text-sm font-medium mb-1">Tiểu sử</label>
+                <textarea value={form.biography}
+                  onChange={(e) => setForm({ ...form, biography: e.target.value })}
                   className="w-full border border-gray-300 px-3 py-2 outline-none focus:border-indigo-600 rounded" rows={3}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Ngày sinh</label>
+                <input type="date" value={form.birthDate}
+                  onChange={(e) => setForm({ ...form, birthDate: e.target.value })}
+                  className="w-full border h-10 border-gray-300 px-3 outline-none focus:border-indigo-600 rounded"
                 />
               </div>
             </div>

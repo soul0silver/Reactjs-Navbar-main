@@ -42,4 +42,17 @@ const order = {
   recharge: "/api/v1/order/recharge",
   search: "/api/v1/order/_search",
 }
-export const URL = { auth, keys, product, proxy, order }
+const books = {
+  search: "/api/v1/books/_search",
+  base: "/api/v1/books",
+}
+const authors = {
+  base: "/api/v1/authors",
+}
+const categories = {
+  base: "/api/v1/categories",
+}
+const publishers = {
+  base: "/api/v1/publishers",
+}
+export const URL = { auth, keys, product, proxy, order, books, authors, categories, publishers }
