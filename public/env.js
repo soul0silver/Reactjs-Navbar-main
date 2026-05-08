@@ -1,3 +1,3 @@
 window.env = {
-  BASE_URL: "http://localhost:8002",
+  BASE_URL: "http://160.250.134.143:8002",
 };

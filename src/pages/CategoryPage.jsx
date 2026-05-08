@@ -1,146 +1,307 @@
 import { useEffect, useState } from "react";
-import { listCategories, createCategory, updateCategory, deleteCategory } from "../service/categories/CategoryService";
 import Pagination from "../components/Paging";
 import Subheader from "../components/Subheader";
+import {
+  searchCategory,
+  createCategory,
+  updateCategory,
+  deleteCategory
+} from "../service/category/CategoryService";
 
 export default function CategoryPage() {
-  const [items, setItems] = useState([]);
-  const [paging, setPaging] = useState({ page: 1, totalPages: 1, size: 10 });
-  const [showForm, setShowForm] = useState(false);
-  const [editing, setEditing] = useState(null);
-  const [form, setForm] = useState({ name: "", description: "" });
 
-  const search = (page = 1, size = 10) => {
-    listCategories(page - 1, size).then((res) => {
+  const emptyCategory = {
+    id: null,
+    name: "",
+    description: ""
+  };
+
+  const [categories, setCategories] = useState([]);
+
+  const [criteria, setCriteria] = useState({
+    keyword: "",
+    page: 0,
+    size: 10,
+    name: ""
+  });
+
+  const [paging, setPaging] = useState({
+    page: 0,
+    totalPages: 0,
+    size: 10
+  });
+
+  const [form, setForm] = useState(emptyCategory);
+
+  const search = (body) => {
+    searchCategory(body).then(res => {
       const data = res?.data;
+
       if (data) {
-        setItems(data?.pageData || []);
-        setPaging({ page: data?.pageNumber, totalPages: data?.totalPages, size: data?.pageSize });
+        setCategories(data?.pageData || []);
+
+        setPaging({
+          page: data?.pageNumber,
+          totalPages: data?.totalPages,
+          size: data?.pageSize
+        });
       }
     });
   };
 
-  useEffect(() => { search(); }, []);
+  useEffect(() => {
+    search(criteria);
+  }, []);
 
-  const openCreate = () => {
-    setEditing(null);
-    setForm({ name: "", description: "" });
-    setShowForm(true);
-  };
+  const submit = () => {
 
-  const openEdit = (item) => {
-    setEditing(item);
-    setForm({ name: item.name || "", description: item.description || "" });
-    setShowForm(true);
-  };
-
-  const handleSave = () => {
-    if (!form.name.trim()) {
-      alert("Vui lòng nhập tên danh mục");
+    if (!form?.name?.trim()) {
+      alert("Tên danh mục không được để trống");
       return;
     }
-    const payload = { name: form.name, description: form.description || null };
-    if (editing) {
-      updateCategory(editing.id, payload).then((res) => {
-        if (res?.status === 200) { setShowForm(false); search(paging.page, paging.size); }
-      });
-    } else {
-      createCategory(payload).then((res) => {
-        if (res?.status === 200) { setShowForm(false); search(paging.page, paging.size); }
-      });
+
+    const request = form?.id
+        ? updateCategory(form?.id, form)
+        : createCategory(form);
+
+    request.then(() => {
+      setForm(emptyCategory);
+      search(criteria);
+    });
+  };
+
+  const edit = (item) => {
+    setForm({
+      id: item?.id,
+      name: item?.name,
+      description: item?.description
+    });
+  };
+
+  const remove = (id) => {
+
+    if (!window.confirm("Bạn có chắc chắn muốn xóa ?")) {
+      return;
+    }
+
+    deleteCategory(id).then(() => {
+      search(criteria);
+    });
+  };
+
+  const changePage = (p) => {
+    search({
+      ...criteria,
+      page: p
+    });
+  };
+
+  const incrementPage = () => {
+    if (paging?.page < paging?.totalPages) {
+      changePage(paging?.page + 1);
     }
   };
 
-  const handleDelete = (id) => {
-    if (window.confirm("Bạn có chắc muốn xoá danh mục này?")) {
-      deleteCategory(id).then((res) => {
-        if (res?.status === 200) search(paging.page, paging.size);
-      });
+  const decrementPage = () => {
+    if (paging?.page > 1) {
+      changePage(paging?.page - 1);
     }
   };
-
-  const changePage = (p) => search(p, paging.size);
-  const incrementPage = () => { if (paging.page < paging.totalPages) search(paging.page + 1, paging.size); };
-  const decrementPage = () => { if (paging.page > 1) search(paging.page - 1, paging.size); };
 
   return (
-    <>
-      <Subheader page="Quản lý danh mục" />
-      <div className="w-full flex flex-col justify-center items-center py-8">
-        <div className="border border-gray-200 rounded-md w-full max-w-5xl">
-          <div className="p-5 bg-[#f7f7f7] flex justify-between items-center">
-            <span className="font-bold text-lg">Danh sách danh mục</span>
-            <button className="bg-[#25a945] hover:bg-[#68dd85] text-white px-4 py-2 rounded" onClick={openCreate}>
-              Thêm danh mục
-            </button>
-          </div>
-          <div className="p-5 overflow-x-auto">
-            <table className="w-full border-collapse">
-              <thead>
-                <tr className="font-bold bg-gray-50">
-                  <th className="p-2 text-left">#</th>
-                  <th className="p-2 text-left">Tên</th>
-                  <th className="p-2 text-left">Mô tả</th>
-                  <th className="p-2 text-center">Thao tác</th>
-                </tr>
-              </thead>
-              <tbody>
-                {items?.map((c, i) => (
-                  <tr key={c.id} className="border-t hover:bg-gray-50">
-                    <td className="p-2">{i + 1}</td>
-                    <td className="p-2">{c.name}</td>
-                    <td className="p-2 max-w-xs truncate">{c.description}</td>
-                    <td className="p-2 text-center">
-                      <button className="text-[#017aff] hover:text-[#3f45e8] mr-3" onClick={() => openEdit(c)}>Sửa</button>
-                      <button className="text-[#d93646] hover:text-[#ed7682]" onClick={() => handleDelete(c.id)}>Xoá</button>
-                    </td>
-                  </tr>
-                ))}
-                {items?.length === 0 && (
-                  <tr><td colSpan={4} className="text-center p-4 bg-[#eff6ff]">Không có dữ liệu</td></tr>
-                )}
-              </tbody>
-              {paging?.totalPages > 1 && (
-                <tfoot>
-                  <tr><td colSpan={4}>
-                    <Pagination page={paging.page} totalPages={paging.totalPages} changePage={changePage} incrementPage={incrementPage} decrementPage={decrementPage} />
-                  </td></tr>
-                </tfoot>
-              )}
-            </table>
-          </div>
-        </div>
-      </div>
+      <>
+        <Subheader page={"Quản lý danh mục"} />
 
-      {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h3 className="text-lg font-bold mb-4">{editing ? "Sửa danh mục" : "Thêm danh mục"}</h3>
-            <div className="space-y-3">
-              <div>
-                <label className="block text-sm font-medium mb-1">Tên <span className="text-red-500">*</span></label>
-                <input type="text" value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  className="w-full border h-10 border-gray-300 px-3 outline-none focus:border-indigo-600 rounded"
+        <div className="w-full flex flex-col justify-center items-center py-8">
+
+          <div className="w-full max-w-[1200px] border border-gray-200 rounded-md">
+
+            {/* Search */}
+            <div className="p-[20px] bg-[#f7f7f7] flex flex-col md:flex-row gap-4">
+
+              <div className="flex flex-col flex-1">
+                <label>Tìm kiếm</label>
+
+                <input
+                    type="text"
+                    placeholder="Tên danh mục..."
+                    value={criteria?.name}
+                    onChange={(e) =>
+                        setCriteria({
+                          ...criteria,
+                          name: e.target.value
+                        })
+                    }
+                    className="border h-[38px] border-gray-300 pl-3 outline-none focus:border-indigo-600"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Mô tả</label>
-                <textarea value={form.description}
-                  onChange={(e) => setForm({ ...form, description: e.target.value })}
-                  className="w-full border border-gray-300 px-3 py-2 outline-none focus:border-indigo-600 rounded" rows={3}
-                />
+
+              <div className="flex flex-col">
+                <label className="opacity-0">Action</label>
+
+                <button
+                    onClick={() => search(criteria)}
+                    className="bg-[#1c94c6] px-4 rounded text-white h-[38px]"
+                >
+                  Tìm kiếm
+                </button>
               </div>
             </div>
-            <div className="flex justify-end space-x-3 mt-5">
-              <button className="bg-gray-300 hover:bg-gray-400 px-4 py-2 rounded" onClick={() => setShowForm(false)}>Huỷ</button>
-              <button className="bg-[#25a945] hover:bg-[#68dd85] text-white px-4 py-2 rounded" onClick={handleSave}>
-                {editing ? "Cập nhật" : "Tạo mới"}
-              </button>
+
+            {/* Form */}
+            <div className="p-[20px] border-t border-gray-200">
+
+              <h2 className="font-bold text-lg mb-4">
+                {form?.id ? "Cập nhật danh mục" : "Thêm danh mục"}
+              </h2>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                <div className="flex flex-col">
+                  <label>Tên danh mục</label>
+
+                  <input
+                      type="text"
+                      value={form?.name}
+                      onChange={(e) =>
+                          setForm({
+                            ...form,
+                            name: e.target.value
+                          })
+                      }
+                      className="border h-[38px] border-gray-300 pl-3 outline-none"
+                  />
+                </div>
+
+                <div className="flex flex-col">
+                  <label>Mô tả</label>
+
+                  <textarea
+                      rows={3}
+                      value={form?.description}
+                      onChange={(e) =>
+                          setForm({
+                            ...form,
+                            description: e.target.value
+                          })
+                      }
+                      className="border border-gray-300 p-3 outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="mt-4 flex gap-2">
+
+                <button
+                    onClick={submit}
+                    className="bg-blue-600 text-white px-4 py-2 rounded"
+                >
+                  {form?.id ? "Cập nhật" : "Thêm mới"}
+                </button>
+
+                <button
+                    onClick={() => setForm(emptyCategory)}
+                    className="bg-gray-500 text-white px-4 py-2 rounded"
+                >
+                  Làm mới
+                </button>
+              </div>
+            </div>
+
+            {/* Table */}
+            <div className="p-[20px] overflow-x-auto">
+
+              <table className="w-full border-collapse">
+
+                <thead>
+                <tr className="font-bold border-b">
+                  <th className="p-2 w-[50px]">#</th>
+                  <th className="p-2">Tên danh mục</th>
+                  <th className="p-2">Mô tả</th>
+                  <th className="p-2 w-[150px]">Hành động</th>
+                </tr>
+                </thead>
+
+                <tbody>
+
+                {
+                  categories?.map((item, index) => (
+                      <tr key={item?.id} className="border-b">
+
+                        <td className="p-2 text-center">
+                          {(paging.page - 1) * paging.size + index + 1}
+                        </td>
+
+                        <td className="p-2">
+                          {item?.name}
+                        </td>
+
+                        <td className="p-2">
+                          {item?.description}
+                        </td>
+
+                        <td className="p-2">
+                          <div className="flex gap-2 justify-center">
+
+                            <button
+                                onClick={() => edit(item)}
+                                className="bg-yellow-500 text-white px-3 py-1 rounded"
+                            >
+                              Sửa
+                            </button>
+
+                            <button
+                                onClick={() => remove(item?.id)}
+                                className="bg-red-600 text-white px-3 py-1 rounded"
+                            >
+                              Xóa
+                            </button>
+
+                          </div>
+                        </td>
+                      </tr>
+                  ))
+                }
+
+                {
+                    categories?.length === 0 &&
+                    <tr>
+                      <td
+                          colSpan={4}
+                          className="text-center p-4 bg-[#eff6ff]"
+                      >
+                        Không có dữ liệu
+                      </td>
+                    </tr>
+                }
+
+                </tbody>
+
+                {
+                    paging?.totalPages > 0 &&
+                    <tfoot>
+                    <tr>
+                      <td colSpan={4}>
+
+                        <Pagination
+                            page={paging?.page}
+                            pageSize={paging?.size}
+                            totalPages={paging?.totalPages}
+                            changePage={changePage}
+                            incrementPage={incrementPage}
+                            decrementPage={decrementPage}
+                        />
+
+                      </td>
+                    </tr>
+                    </tfoot>
+                }
+
+              </table>
+
             </div>
           </div>
         </div>
-      )}
-    </>
+      </>
   );
 }

@@ -82,26 +82,38 @@ function Navbar() {
                   Trang chủ
                 </li>
               </NavLink>
-              <NavLink
-                to="/help"
-                style={({ isActive }) => ({
-                  color: isActive ? "rgb(107, 33, 168)" : scrolled ? "#000" : '#fff',
-                  textDecoration: "none",
-                })}
-              >
-                <li className="mr-10 p-1 border-2 border-transparent hover:text-black  hover:bg-white rounded">
-                  Hướng dẫn
-                </li>
-              </NavLink>
+
               {checkLogin() && <NavLink
-                to="/keys"
+                to="/category"
                 style={({ isActive }) => ({
                   color: isActive ? "rgb(107, 33, 168)" : scrolled ? "#000" : '#fff',
                   textDecoration: "none",
                 })}
               >
                 <li className="mr-10 p-1 border-2 border-transparent hover:text-black  hover:bg-white rounded">
-                  Quản lý key
+                  Danh mục
+                </li>
+              </NavLink>}
+              {checkLogin() && <NavLink
+                  to="/authors"
+                  style={({ isActive }) => ({
+                    color: isActive ? "rgb(107, 33, 168)" : scrolled ? "#000" : '#fff',
+                    textDecoration: "none",
+                  })}
+              >
+                <li className="mr-10 p-1 border-2 border-transparent hover:text-black  hover:bg-white rounded">
+                  Tác giả
+                </li>
+              </NavLink>}
+              {checkLogin() && <NavLink
+                  to="/publishers"
+                  style={({ isActive }) => ({
+                    color: isActive ? "rgb(107, 33, 168)" : scrolled ? "#000" : '#fff',
+                    textDecoration: "none",
+                  })}
+              >
+                <li className="mr-10 p-1 border-2 border-transparent hover:text-black  hover:bg-white rounded">
+                  Nhà xuất bản
                 </li>
               </NavLink>}
               {checkLogin() && <NavLink
@@ -112,7 +124,7 @@ function Navbar() {
                 })}
               >
                 <li className="mr-10 p-1 border-2 border-transparent hover:text-black  hover:bg-white rounded">
-                  Cửa hàng sách
+                  Danh sách sản phẩm
                 </li>
               </NavLink>}
               {!checkLogin() ? <><NavLink
@@ -149,7 +161,7 @@ function Navbar() {
                     color: scrolled ? "#000" : '#fff',
                     textDecoration: "none",
                   }}>
-                    {getUserInfo()?.username} | <span className="text-[#31bf55]">{wallet} VND</span>
+                    {getUserInfo()?.username}
                     <div className="dropdown-content">
                       <ul>
                         <li>
@@ -157,8 +169,7 @@ function Navbar() {
                             className="hover:text-[#3c65e0]" onClick={handleLogout}>Đăng xuất</a>
                         </li>
                         <li><a className="hover:text-[#3c65e0]">Đổi mật khẩu</a></li>
-                        <li><a href="/recharge" className="hover:text-[#3c65e0]">Nạp thêm tiền</a></li>
-                        <li><a href="/transaction" className="hover:text-[#3c65e0]">Lịch sử giao dịch</a></li>
+
                       </ul>
                     </div>
                   </div>
